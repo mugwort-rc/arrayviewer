@@ -28,12 +28,18 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QGraphicsView" name="graphicsViewOrigin"/>
-      <widget class="QGraphicsView" name="graphicsView"/>
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QGraphicsView" name="graphicsViewOrigin"/>
+       <widget class="QGraphicsView" name="graphicsView"/>
+      </widget>
+      <widget class="RichJupyterWidget" name="jupyterConsole"/>
      </widget>
     </item>
    </layout>
@@ -89,6 +95,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RichJupyterWidget</class>
+   <extends>QTextEdit</extends>
+   <header>qtconsole/rich_jupyter_widget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

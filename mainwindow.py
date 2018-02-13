@@ -13,6 +13,7 @@ from ui.mainwindow import Ui_MainWindow
 from arrayopendialog import ArrayOpenDialog
 from sliderdialog import SliderDialog
 
+from qtconsole.inprocess import QtInProcessKernelManager
 from PIL import Image
 from PIL.ImageQt import ImageQt
 import numpy as np
@@ -113,6 +114,14 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        # init jupyter kernel
+        self.init_jupyter_kernel(self.ui.jupyterConsole)
+        app = QApplication.instance()
+        app.aboutToQuit.connect(self.shutdown_jupyter_kernel)
+        self.ui.jupyterConsole.kernel_manager.kernel.shell.push({
+            "mainwindow": self,
+        })
+        # graphics view
         self.sceneOrigin = ArrayImage(self.ui.graphicsViewOrigin)
         self.scene = ArrayImage(self.ui.graphicsView)
         self.ui.graphicsViewOrigin.setScene(self.sceneOrigin)
@@ -126,6 +135,25 @@ class MainWindow(QMainWindow):
 
         self.slider = SliderDialog(self)
         self.slider.valueChanged.connect(self.slider_valueChanged)
+
+    @classmethod
+    def init_jupyter_kernel(cls, widget):
+        """Start a kernel, connect to it, and create a RichJupyterWidget to use it
+        """
+        kernel_manager = QtInProcessKernelManager(kernel_name="python3")
+        kernel_manager.start_kernel()
+
+        kernel_client = kernel_manager.client()
+        kernel_client.start_channels()
+
+        widget.kernel_manager = kernel_manager
+        widget.kernel_client = kernel_client
+
+    @pyqtSlot()
+    def shutdown_jupyter_kernel(self):
+        print("Shutting down kernel...")
+        self.ui.jupyterConsole.kernel_client.stop_channels()
+        self.ui.jupyterConsole.kernel_manager.shutdown_kernel()
 
     def setImage(self, img):
         self.sceneOrigin.setImage(img)
